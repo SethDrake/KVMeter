@@ -3,8 +3,8 @@
   <ToolchainID>com.visualgdb.arm-eabi</ToolchainID>
   <BspID>com.sysprogs.arm.stm32</BspID>
   <BspVersion>4.1</BspVersion>
-  <McuID>STM32F100RB</McuID>
-  <MCUDefinitionFile>STM32F1xxxx/DeviceDefinitions/stm32f100xb.xml</MCUDefinitionFile>
+  <McuID>STM32F103RB</McuID>
+  <MCUDefinitionFile>STM32F1xxxx/DeviceDefinitions/stm32f103xb.xml</MCUDefinitionFile>
   <MCUProperties>
     <Entries>
       <KeyValue>

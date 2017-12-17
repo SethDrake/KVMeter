@@ -4,12 +4,17 @@
 #include "stm32f10x_gpio.h"
 #include <stm32f10x_adc.h>
 #include "misc.h"
+#include "s6d0164.h"
+#include "objects.h"
+#include "delay.h"
 
 
-int adc_mode = 0;
+ADC_MODE adc_mode = VOLTAGE;
 
 float voltage = 0.0f;
 float cpuTemp = 0.0f;
+
+S6D0164 display;
 
 void Faults_Configuration()
 {
@@ -33,11 +38,11 @@ void GPIO_Configuration()
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
-	/*GPIO_InitStructure.GPIO_Pin = SPI_SCK | SPI_MOSI | SPI_MISO;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(SPI_PORT, &GPIO_InitStructure);
-	*/
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	
 
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); //disable JTAG
 }
@@ -49,12 +54,12 @@ void NVIC_Configuration()
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
-	NVIC_InitStructure.NVIC_IRQChannel = ADC1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 15;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-	NVIC_EnableIRQ(ADC1_IRQn);
+	NVIC_EnableIRQ(ADC1_2_IRQn);
 }
 
 
@@ -96,7 +101,12 @@ int main()
 	
 	while (true)
 	{
-		
+		GPIOC->BSRR = GPIO_Pin_8;	
+		GPIOC->BRR = GPIO_Pin_9;
+		DelayManager::Delay(1000);
+		GPIOC->BSRR = GPIO_Pin_9;	
+		GPIOC->BRR = GPIO_Pin_8;
+		DelayManager::Delay(1000);
 	}
 }
 
@@ -109,11 +119,11 @@ void readADCValue()
 	ADC_SoftwareStartConvCmd(ADC1, DISABLE);
 	uint16_t val = ADC_GetConversionValue(ADC1);
 	ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
-	if (adc_mode == 0)
+	if (adc_mode == VOLTAGE)
 	{
 		voltage = 2 * (val * 3.06f) / 4095;	
 	}
-	else if (adc_mode == 1)
+	else if (adc_mode == TEMPERATURE)
 	{
 		ADC_TempSensorVrefintCmd(DISABLE);
 		float v25 = 1.43f;
@@ -125,7 +135,7 @@ void readADCValue()
 
 void startVoltageMeasure()
 {
-	adc_mode = 0;
+	adc_mode = VOLTAGE;
 	ADC_Cmd(ADC1, ENABLE);
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_239Cycles5);
 	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
@@ -134,7 +144,7 @@ void startVoltageMeasure()
 
 void startTemperatureMeasure()
 {
-	adc_mode = 1;
+	adc_mode = TEMPERATURE;
 	ADC_Cmd(ADC1, ENABLE);
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_41Cycles5);
 	ADC_TempSensorVrefintCmd(ENABLE);
