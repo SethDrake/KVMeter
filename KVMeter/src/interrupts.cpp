@@ -79,13 +79,6 @@ void __attribute__((interrupt("IRQ"))) DebugMon_Handler(void)
 void __attribute__((interrupt("IRQ"))) SysTick_Handler(void) {
 	DelayManager::SysTickIncrement();
 }
-
-void __attribute__((interrupt("IRQ")))  DMA1_Channel5_IRQHandler(void)
-{
-	if (display.IsDataSending()) {
-		display.DMATXInterrupt();
-	}
-}
 	
 void __attribute__((interrupt("IRQ"))) ADC1_2_IRQHandler(void) {
 	if (ADC_GetITStatus(ADC1, ADC_IT_EOC)) {
@@ -100,11 +93,10 @@ void custom_fault_handler(const char * title)
 	if (display.isReady())
 	{
 		
-		display.setLandscape();
-		display.setDisableDMA(1);
+		display.setRotation(LANDSCAPE);
 		display.setColor(WHITE, BLUE);
 		display.clear(BLUE);
-		display.printf(10, 220, title);
+		display.printf(10, 165, title);
 	}
 }
 
@@ -132,20 +124,20 @@ void hard_fault_handler(unsigned int * hardfault_args)
 	custom_fault_handler("HARD FAULT DETECTED --- SYSTEM STOPPED");
 	if (display.isReady())
 	{
-		display.printf(10, 200, "R0 = %x", stacked_r0);
-		display.printf(10, 185, "R1 = %x", stacked_r1);
-		display.printf(10, 170, "R2 = %x", stacked_r2);
-		display.printf(10, 155, "R3 = %x", stacked_r3);
-		display.printf(10, 140, "R12 = %x", stacked_r12);
-		display.printf(10, 125, "LR [R14] = %x", stacked_lr);
-		display.printf(10, 110, "PC [R15] = %x", stacked_pc);
-		display.printf(10, 95, "PSR = %x", stacked_psr);
-		display.printf(10, 80, "BFAR = %x", (*((volatile unsigned long *)(0xE000ED38))));
-		display.printf(10, 65, "CFSR = %x", (*((volatile unsigned long *)(0xE000ED28))));
-		display.printf(10, 50, "HFSR = %x", (*((volatile unsigned long *)(0xE000ED2C))));
-		display.printf(10, 35, "DFSR = %x", (*((volatile unsigned long *)(0xE000ED30))));
-		display.printf(10, 20, "AFSR = %x", (*((volatile unsigned long *)(0xE000ED3C))));
-		display.printf(10, 5, "SCB_SHCSR = %x", SCB->SHCSR);
+		display.printf(10, 160, "R0 = %x", stacked_r0);
+		display.printf(10, 145, "R1 = %x", stacked_r1);
+		display.printf(10, 130, "R2 = %x", stacked_r2);
+		display.printf(10, 115, "R3 = %x", stacked_r3);
+		display.printf(10, 100, "R12 = %x", stacked_r12);
+		display.printf(10, 85, "LR [R14] = %x", stacked_lr);
+		display.printf(10, 70, "PC [R15] = %x", stacked_pc);
+		display.printf(10, 55, "PSR = %x", stacked_psr);
+		display.printf(10, 40, "BFAR = %x", (*((volatile unsigned long *)(0xE000ED38))));
+		display.printf(10, 25, "CFSR = %x", (*((volatile unsigned long *)(0xE000ED28))));
+		display.printf(10, 10, "HFSR = %x", (*((volatile unsigned long *)(0xE000ED2C))));
+		/*display.printf(10, 35, "DFSR = %x", (*((volatile unsigned long *)(0xE000ED30))));
+		display.printf(10, 20, "AFSR = %x", (*((volatile unsigned long *)(0xE000ED3C))));*/
+		display.printf(10, 0, "SCB_SHCSR = %x", SCB->SHCSR);
 	}
 
 	while (1);

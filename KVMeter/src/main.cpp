@@ -7,6 +7,7 @@
 #include "s6d0164.h"
 #include "objects.h"
 #include "delay.h"
+#include "periph_config.h"
 
 
 ADC_MODE adc_mode = VOLTAGE;
@@ -38,11 +39,26 @@ void GPIO_Configuration()
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = V_MEASURE_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(V_MEASURE_PORT, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = 0x00FF; //lower 8 bit
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(S6D0164_DATA_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = S6D0164_CTRL_PIN_RD | S6D0164_CTRL_PIN_WR | S6D0164_CTRL_PIN_CS | S6D0164_CTRL_PIN_RS | S6D0164_CTRL_PIN_RESET;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(S6D0164_CTRL_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9; // indication leds
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	
+
 
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); //disable JTAG
 }
@@ -98,9 +114,20 @@ int main()
 	ADC_Configuration();
 	NVIC_Configuration();
 	
-	
+	display.setupHw(S6D0164_DATA_PORT, S6D0164_CTRL_PORT, S6D0164_CTRL_PIN_RD, S6D0164_CTRL_PIN_WR, S6D0164_CTRL_PIN_RS, S6D0164_CTRL_PIN_CS, S6D0164_CTRL_PIN_RESET);
+	display.readID();
+	display.init();
+	display.setRotation(PORTRAIT);
+	display.clear(BLACK);
+
+	display.printf(50, 50, "TEST MODE");
+
+	display.pixelDraw(0, 0, GREEN);
+	//display.pixelDraw(150, 150, GREEN);
+	//display.pixelDraw(0, 0, GREEN);
+	//display.pixelDraw(0, 0, GREEN);
 	while (true)
-	{
+	{	
 		GPIOC->BSRR = GPIO_Pin_8;	
 		GPIOC->BRR = GPIO_Pin_9;
 		DelayManager::Delay(1000);

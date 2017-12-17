@@ -6,38 +6,17 @@
 /* PA13, PA14 - SWD - DON'T USE!!! */
 /*        PA11, PA12 - USB		   */
 
-#define HV_PUMP_PORT		GPIOA
-#define HV_PUMP_PIN			GPIO_Pin_1
-#define HV_PULSE_PIN		GPIO_Pin_2
-#define HV_TEST_PIN			GPIO_Pin_3
 
-#define INDICATION_PORT		GPIOA
-#define IND_PULSE_PIN		GPIO_Pin_4
-#define IND_VIBRATE_PIN		GPIO_Pin_5
-#define IND_SOUND_PIN		GPIO_Pin_6
+#define V_MEASURE_PORT			GPIOA
+#define V_MEASURE_PIN			GPIO_Pin_0
 
-#define PWR_CONTROL_PORT	GPIOA
-#define PWR_CONTROL_DISP	GPIO_Pin_7
+#define S6D0164_DATA_PORT		GPIOA
+#define S6D0164_CTRL_PORT		GPIOC
+#define S6D0164_CTRL_PIN_RESET	GPIO_Pin_4
+#define S6D0164_CTRL_PIN_RD		GPIO_Pin_3
+#define S6D0164_CTRL_PIN_WR		GPIO_Pin_2
+#define S6D0164_CTRL_PIN_RS		GPIO_Pin_1
+#define S6D0164_CTRL_PIN_CS		GPIO_Pin_0
 
-#define SD_PORT				GPIOA
-#define SD_PIN_CS			GPIO_Pin_8
-
-#define BATT_CTRL_PORT		GPIOB
-#define BATT_CTL_V_PIN		GPIO_Pin_0
-
-#define KBRD_PORT			GPIOB
-#define KEY_1_PIN			GPIO_Pin_1
-#define KEY_2_PIN			GPIO_Pin_2
-#define KEY_3_PIN			GPIO_Pin_3
-
-#define S6D0164_PORT        GPIOB
-#define S6D0164_PIN_RS      GPIO_Pin_10
-#define S6D0164_PIN_RESET   GPIO_Pin_11
-#define S6D0164_PIN_CS      GPIO_Pin_12
-
-#define SPI_PORT			GPIOB
-#define SPI_SCK				GPIO_Pin_13
-#define SPI_MISO			GPIO_Pin_14
-#define SPI_MOSI			GPIO_Pin_15
 
 #endif //__PERIPH_CONFIG_H_
