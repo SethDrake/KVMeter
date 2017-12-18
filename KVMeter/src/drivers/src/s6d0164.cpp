@@ -157,20 +157,6 @@ void S6D0164::setPage(const uint16_t StartPage, const uint16_t EndPage)
 	sendCmdAndData(S6D0164_GRAM_ADDRESS_SET_X, StartPage);
 }
 
-void S6D0164::setWindow(uint16_t startX, uint16_t startY, uint16_t stopX, uint16_t stopY)
-{
-	if (rotationMode == LANDSCAPE || rotationMode == UPSIDE_DOWN_LANDSCAPE)
-	{
-		setPage(TFT_MAX_X - stopY, TFT_MAX_X - startY);
-		setCol(startX, stopX);
-	}
-	else
-	{
-		setPage(startX, stopX);
-		setCol(startY, stopY);		
-	}
-}	
-
 void S6D0164::setFont(const unsigned char font[])
 {
 	this->font = font;
@@ -180,38 +166,14 @@ void S6D0164::setFont(const unsigned char font[])
 void S6D0164::setRotation(const uint8_t rotationMode)
 {
 	this->rotationMode = rotationMode;
-	switchCs(0);
-	sendCmd(S6D0164_ENTRY_MODE);
-	switch (this->rotationMode) 
-	{
-	case 0:
-		//PORTRAIT
-		sendWord(0x1030);
-		break;
-	case 1:
-	    //LANDSCAPE
-		sendWord(0x1038);
-		break;
-	case 2:	
-		//UPSIDE DOWN PORTRAIT
-		sendWord(0x1000);
-		break;
-	case 3:
-		//UPSIDE DOWN LANDSCAPE
-		sendWord(0x1008);
-		break;
-	default:
-		break;
-	}
-	switchCs(1);
 }
 
 void S6D0164::fillScreen(const uint16_t xstart, const uint16_t ystart, const uint16_t xstop, const uint16_t ystop, const uint16_t color)
 {
 	uint32_t pixels = (xstop - xstart + 1) * (ystop - ystart + 1);
-	//while (this->isDataSending); //wait until all data wasn't sended
 	switchCs(0);
-	setWindow(xstart, ystart, xstop, ystop);
+	setPage(xstart, xstop);
+	setCol(ystart, ystop);
 	sendCmd(S6D0164_GRAM_RW);
 
 	while (pixels) {
@@ -224,8 +186,16 @@ void S6D0164::fillScreen(const uint16_t xstart, const uint16_t ystart, const uin
 void S6D0164::pixelDraw(uint16_t xpos, uint16_t ypos, uint16_t color)
 {
 	switchCs(0);
-	//while (this->isDataSending); //wait until all data wasn't sended
-	setWindow(xpos, ypos, xpos, ypos);
+	if (rotationMode == PORTRAIT)
+	{
+		setPage(xpos, xpos);
+		setCol(TFT_MAX_Y - ypos, TFT_MAX_Y - ypos);	
+	}
+	else if (rotationMode == LANDSCAPE)
+	{
+		setPage(TFT_MAX_X - ypos, TFT_MAX_X - ypos);
+		setCol(TFT_MAX_Y - xpos, TFT_MAX_Y - xpos);		
+	}
 	sendCmd(S6D0164_GRAM_RW);
 	sendWord(color);
 	switchCs(1);
@@ -234,14 +204,22 @@ void S6D0164::pixelDraw(uint16_t xpos, uint16_t ypos, uint16_t color)
 void S6D0164::bufferDraw(uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize, uint16_t* buf)
 {
 	switchCs(0);
-	setWindow(x, y, x + xsize - 1, y + ysize - 1);
+	if (rotationMode == PORTRAIT)
+	{
+		setPage(x, x + xsize - 1);
+		setCol(TFT_MAX_Y - y, TFT_MAX_Y - y + ysize - 1);	
+	}
+	else if (rotationMode == LANDSCAPE)
+	{
+		setPage(TFT_MAX_X - y - ysize - 1, TFT_MAX_X - y);
+		setCol(TFT_MAX_Y - x - xsize - 1, TFT_MAX_Y - x);		
+	}
 	sendCmd(S6D0164_GRAM_RW);
 
 	for (uint32_t l = 0; l < xsize * ysize; l++) {
 		sendWord(buf[l]);
 	}
 	switchCs(1);
-	//while (this->isDataSending); //wait until all data wasn't sended*/
 }
 
 void S6D0164::lineDraw(uint16_t ypos, uint16_t* line,  uint32_t size)
@@ -249,12 +227,23 @@ void S6D0164::lineDraw(uint16_t ypos, uint16_t* line,  uint32_t size)
 	bufferDraw(0, ypos, size, 1, line);
 }
 
-void S6D0164::drawBorder(uint16_t xpos, uint16_t ypos, uint16_t width, uint16_t height, uint16_t bw, uint16_t color)
+void S6D0164::drawBorder(uint16_t xpos, uint16_t ypos, uint16_t width, uint16_t height, uint16_t borderWidth, uint16_t color)
 {
-	fillScreen(xpos, ypos, xpos + bw, ypos + height, color);
-	fillScreen(xpos + bw, ypos + height - bw, xpos + width, ypos + height, color);
-	fillScreen(xpos + width - bw, ypos, xpos + width, ypos + height - bw, color);
-	fillScreen(xpos + bw, ypos, xpos + width - bw, ypos + bw, color);
+	const uint16_t bw = borderWidth - 1;
+	if (rotationMode == PORTRAIT)
+	{
+		fillScreen(xpos, TFT_MAX_Y - ypos - height, xpos + bw, TFT_MAX_Y - ypos, color);
+		fillScreen(xpos + bw, TFT_MAX_Y - ypos - bw, xpos + width, TFT_MAX_Y - ypos, color);
+		fillScreen(xpos + width - bw, TFT_MAX_Y - ypos - height, xpos + width, TFT_MAX_Y - ypos - bw, color);
+		fillScreen(xpos + bw, TFT_MAX_Y - ypos - height, xpos + width - bw, TFT_MAX_Y - ypos - height + bw, color);
+	}
+	else
+	{
+		fillScreen(TFT_MAX_X - ypos - height, TFT_MAX_Y - xpos - bw, TFT_MAX_X - ypos, TFT_MAX_Y - xpos, color);
+		fillScreen(TFT_MAX_X - ypos - bw, TFT_MAX_Y - xpos - width, TFT_MAX_X - ypos, TFT_MAX_Y - xpos, color);
+		fillScreen(TFT_MAX_X - ypos - height, TFT_MAX_Y - xpos - bw - width, TFT_MAX_X - ypos, TFT_MAX_Y - xpos - width, color);
+		fillScreen(TFT_MAX_X - ypos - height - bw, TFT_MAX_Y - xpos - bw - width, TFT_MAX_X - ypos - height, TFT_MAX_Y - xpos, color);		
+	}
 }
 
 void S6D0164::putChar(uint16_t x, uint16_t y, uint8_t chr, uint16_t charColor, uint16_t bkgColor) {
@@ -268,7 +257,7 @@ void S6D0164::putChar(uint16_t x, uint16_t y, uint8_t chr, uint16_t charColor, u
 	uint16_t charbuf[(f_width + 1) * f_height];
 	
 	//fill charbuf
-	if (rotationMode == LANDSCAPE || rotationMode == UPSIDE_DOWN_LANDSCAPE)
+	if (rotationMode == LANDSCAPE)
 	{
 		for (i = 0; i < f_width; i++)
 		{

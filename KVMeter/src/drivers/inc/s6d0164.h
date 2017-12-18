@@ -14,9 +14,7 @@
 typedef enum
 { 
 	PORTRAIT     = 0,
-	LANDSCAPE,
-	UPSIDE_DOWN_PORTRAIT,
-	UPSIDE_DOWN_LANDSCAPE,
+	LANDSCAPE
 } ROTATION_MODE;
 
 
@@ -29,7 +27,6 @@ public:
 	void enable(short on);
 	uint32_t readID();
 	void clear(uint16_t color);
-	void setWindow(uint16_t startX, uint16_t startY, uint16_t stopX, uint16_t stopY);
 	void pixelDraw(uint16_t xpos, uint16_t ypos, uint16_t color);
 	void lineDraw(uint16_t ypos, uint16_t* line, uint32_t size);
 	void fillScreen(uint16_t xstart, uint16_t ystart, uint16_t xstop, uint16_t ystop, uint16_t color);

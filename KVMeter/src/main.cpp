@@ -116,15 +116,21 @@ int main()
 	
 	display.setupHw(S6D0164_DATA_PORT, S6D0164_CTRL_PORT, S6D0164_CTRL_PIN_RD, S6D0164_CTRL_PIN_WR, S6D0164_CTRL_PIN_RS, S6D0164_CTRL_PIN_CS, S6D0164_CTRL_PIN_RESET);
 	display.init();
-	display.setRotation(PORTRAIT);
 	display.clear(BLACK);
 
-	display.printf(50, 50, "TEST MODE");
+	display.printf(10, 50, "TEST MODE");
+	display.drawBorder(5, 5, 50, 50, 2, GREEN);
+	uint16_t buf1[] = { GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN };
+	display.bufferDraw(0, 80, 10, 2, buf1); 
 
-	display.pixelDraw(0, 0, GREEN);
-	display.pixelDraw(155, 155, BLUE);
-	//display.pixelDraw(0, 0, GREEN);
-	//display.pixelDraw(0, 0, GREEN);
+	display.setRotation(LANDSCAPE);
+	display.pixelDraw(0, 0, RED);
+	display.printf(100, 50, "TEST MODE");
+	display.drawBorder(5, 5, 50, 50, 2, BLUE);
+	uint16_t buf2[] = { BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE };
+	display.bufferDraw(0, 80, 10, 2, buf2); 
+
+
 	while (true)
 	{	
 		GPIOC->BSRR = GPIO_Pin_8;	
