@@ -65,7 +65,6 @@ protected:
 private:
 	void setCol(uint16_t StartCol, uint16_t EndCol);
 	void setPage(uint16_t StartPage, uint16_t EndPage);
-	void setBus8bit(uint8_t val);
 	void setBus(uint16_t val);
 	void sendCmd(uint8_t index);
 	void sendWord(uint16_t data);

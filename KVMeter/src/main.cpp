@@ -115,7 +115,6 @@ int main()
 	NVIC_Configuration();
 	
 	display.setupHw(S6D0164_DATA_PORT, S6D0164_CTRL_PORT, S6D0164_CTRL_PIN_RD, S6D0164_CTRL_PIN_WR, S6D0164_CTRL_PIN_RS, S6D0164_CTRL_PIN_CS, S6D0164_CTRL_PIN_RESET);
-	display.readID();
 	display.init();
 	display.setRotation(PORTRAIT);
 	display.clear(BLACK);
@@ -123,7 +122,7 @@ int main()
 	display.printf(50, 50, "TEST MODE");
 
 	display.pixelDraw(0, 0, GREEN);
-	//display.pixelDraw(150, 150, GREEN);
+	display.pixelDraw(155, 155, BLUE);
 	//display.pixelDraw(0, 0, GREEN);
 	//display.pixelDraw(0, 0, GREEN);
 	while (true)

@@ -28,6 +28,12 @@ void S6D0164::setupHw(GPIO_TypeDef* dataPort, GPIO_TypeDef* controlPort, const u
 	this->rsPin = rsPin;
 	this->csPin = csPin;
 	this->resetPin = resetPin;
+
+	switchRd(1);
+	switchWr(1);
+	switchRs(1);
+	switchCs(1);
+	switchReset(1);
 }
 
 
@@ -51,8 +57,6 @@ void S6D0164::switchToWriteMode()
 
 void S6D0164::init() {
 
-	switchToWriteMode();
-
 	switchReset(1);
 	DelayManager::DelayMs(5);
 	switchReset(0);
@@ -61,8 +65,6 @@ void S6D0164::init() {
 	DelayManager::DelayMs(15);
 
 	switchCs(0);
-
-	sendCmdAndData(S6D0164_ENTRY_MODE, 0x001A);
 
 	sendCmdAndData(S6D0164_POWER_2, 0x001A);
 	sendCmdAndData(S6D0164_POWER_3, 0x3121);
@@ -105,7 +107,6 @@ void S6D0164::init() {
 	sendCmdAndData(S6D0164_GAMMA_7, 0x0400);
 	sendCmdAndData(S6D0164_GAMMA_8, 0x1108);
 	sendCmdAndData(S6D0164_GAMMA_9, 0x050C);
-	
 
 	sendCmdAndData(S6D0164_HORIZ_END, TFT_MAX_X); 
 	sendCmdAndData(S6D0164_HORIZ_START, 0x0000); 	
@@ -122,7 +123,7 @@ void S6D0164::init() {
 }
 
 
-void S6D0164::enable(short on) {
+void S6D0164::enable(const short on) {
 	switchCs(0);
 	if (on == 0) {
 		sendCmdAndData(S6D0164_DISPLAY, 0x0013);
@@ -135,13 +136,13 @@ void S6D0164::enable(short on) {
 	DelayManager::Delay(100);
 }
 
-void S6D0164::clear(uint16_t color)
+void S6D0164::clear(const uint16_t color)
 {
 	fillScreen(TFT_MIN_X, TFT_MIN_Y, TFT_MAX_X, TFT_MAX_Y, color);
 }
 
 
-void S6D0164::setCol(uint16_t StartCol, uint16_t EndCol)
+void S6D0164::setCol(const uint16_t StartCol, const uint16_t EndCol)
 {
 	
 	sendCmdAndData(S6D0164_VERT_START, StartCol);
@@ -149,7 +150,7 @@ void S6D0164::setCol(uint16_t StartCol, uint16_t EndCol)
 	sendCmdAndData(S6D0164_GRAM_ADDRESS_SET_Y, StartCol);
 }
 
-void S6D0164::setPage(uint16_t StartPage, uint16_t EndPage)
+void S6D0164::setPage(const uint16_t StartPage, const uint16_t EndPage)
 {
 	sendCmdAndData(S6D0164_HORIZ_START, StartPage);
 	sendCmdAndData(S6D0164_HORIZ_END, EndPage);
@@ -165,7 +166,7 @@ void S6D0164::setWindow(uint16_t startX, uint16_t startY, uint16_t stopX, uint16
 	}
 	else
 	{
-		setPage(TFT_MAX_X - startX, TFT_MAX_X - stopX);
+		setPage(startX, stopX);
 		setCol(startY, stopY);		
 	}
 }	
@@ -176,10 +177,10 @@ void S6D0164::setFont(const unsigned char font[])
 }
 
 
-void S6D0164::setRotation(uint8_t rotationMode)
+void S6D0164::setRotation(const uint8_t rotationMode)
 {
 	this->rotationMode = rotationMode;
-	/*switchCs(0);
+	switchCs(0);
 	sendCmd(S6D0164_ENTRY_MODE);
 	switch (this->rotationMode) 
 	{
@@ -202,7 +203,7 @@ void S6D0164::setRotation(uint8_t rotationMode)
 	default:
 		break;
 	}
-	switchCs(1);*/
+	switchCs(1);
 }
 
 void S6D0164::fillScreen(const uint16_t xstart, const uint16_t ystart, const uint16_t xstop, const uint16_t ystop, const uint16_t color)
@@ -222,8 +223,8 @@ void S6D0164::fillScreen(const uint16_t xstart, const uint16_t ystart, const uin
 
 void S6D0164::pixelDraw(uint16_t xpos, uint16_t ypos, uint16_t color)
 {
-	//while (this->isDataSending); //wait until all data wasn't sended
 	switchCs(0);
+	//while (this->isDataSending); //wait until all data wasn't sended
 	setWindow(xpos, ypos, xpos, ypos);
 	sendCmd(S6D0164_GRAM_RW);
 	sendWord(color);
@@ -343,32 +344,25 @@ void S6D0164::printf(uint16_t x, uint16_t y, const char *format, ...)
 }
 
 uint32_t S6D0164::readID() {
-	uint16_t data;
+	switchToReadMode();
 	sendCmd(S6D0164_SYSTEM);
-	data = readWord();
+	const uint16_t data = readWord();
+	switchToWriteMode();
 	return data;
 }
 
 
 uint16_t S6D0164::readWord()
 {
-	switchToReadMode();
+	switchCs(0);
 	switchRd(0);
+	switchRd(1);
 	uint16_t data = dataPort->IDR << 8;
-	switchRd(1);
 	switchRd(0);
-	data |= dataPort->IDR & 0xFF;
 	switchRd(1);
-	switchToWriteMode();
+	data |= dataPort->IDR & 0xFF;
+	switchCs(1);
 	return data;
-}
-
-void S6D0164::setBus8bit(const uint8_t val)
-{
-	dataPort->ODR &= 0xFF00;
-	dataPort->ODR |= val;
-	switchWr(0);
-	switchWr(1);
 }
 
 void S6D0164::setBus(const uint16_t val)
@@ -433,7 +427,7 @@ uint16_t S6D0164::RGB888ToRGB565(uint8_t r, uint8_t g, uint8_t b)
 	return (uint16_t)(r5 << 11 | g6 << 5 | b5);
 }
 
-void S6D0164::switchRd(short BitVal)
+void S6D0164::switchRd(const short BitVal)
 {
 	if (BitVal != Bit_RESET) {
 		controlPort->BSRR = rdPin;
@@ -443,7 +437,7 @@ void S6D0164::switchRd(short BitVal)
 	}
 }
 
-void S6D0164::switchWr(short BitVal)
+void S6D0164::switchWr(const short BitVal)
 {
 	if (BitVal != Bit_RESET) {
 		controlPort->BSRR = wrPin;
@@ -453,7 +447,7 @@ void S6D0164::switchWr(short BitVal)
 	}
 }
 
-void S6D0164::switchRs(short BitVal)
+void S6D0164::switchRs(const short BitVal)
 {
 	if (BitVal != Bit_RESET) {
 		controlPort->BSRR = rsPin;
@@ -463,7 +457,7 @@ void S6D0164::switchRs(short BitVal)
 	}
 }
 
-void S6D0164::switchCs(short BitVal)
+void S6D0164::switchCs(const short BitVal)
 {
 	if (BitVal != Bit_RESET) {
 		controlPort->BSRR = csPin;
@@ -472,7 +466,7 @@ void S6D0164::switchCs(short BitVal)
 	}
 }
 
-void S6D0164::switchReset(short BitVal)
+void S6D0164::switchReset(const short BitVal)
 {
 	if (BitVal != Bit_RESET) {
 		controlPort->BSRR = resetPin;
