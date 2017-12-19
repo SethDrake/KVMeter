@@ -65,8 +65,10 @@ private:
 	void setBus(uint16_t val);
 	void sendCmd(uint8_t index);
 	void sendWord(uint16_t data);
+	void sendMulti(const uint16_t data, const uint32_t count);
 	void sendCmdAndData(uint8_t cmd, uint16_t data);
 	void putString(const char str[], uint16_t x, uint16_t y, uint16_t charColor, uint16_t bkgColor);
+	void tickWr();
 	void switchRd(short BitVal);
 	void switchWr(short BitVal);
 	void switchRs(short BitVal);

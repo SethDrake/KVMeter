@@ -201,9 +201,16 @@ void S6D0164::fillScreen(const uint16_t xstart, const uint16_t ystart, const uin
 	}
 	sendCmd(S6D0164_GRAM_RW);
 
-	while (pixels) {
-		sendWord(color);
-		pixels--;
+	if (color == BLACK || color == WHITE)
+	{
+		sendMulti(color, pixels);
+	}
+	else
+	{
+		while (pixels) {
+			sendWord(color);
+			pixels--;
+		}	
 	}
 	switchCs(1);
 }
@@ -346,12 +353,10 @@ void S6D0164::setBus(const uint16_t val)
 {
 	dataPort->ODR &= 0xFF00;
 	dataPort->ODR |= val >> 8;
-	switchWr(0);
-	switchWr(1);
+	tickWr();
 	dataPort->ODR &= 0xFF00;
 	dataPort->ODR |= val & 0x00FF;
-	switchWr(0);
-	switchWr(1);
+	tickWr();
 }
 
 void S6D0164::sendCmd(const uint8_t cmd)
@@ -366,6 +371,18 @@ void S6D0164::sendWord(const uint16_t data)
 	setBus(data);
 }
 
+void S6D0164::sendMulti(const uint16_t data, uint32_t count)
+{
+	switchRs(1);
+	setBus(data);
+	count--;
+	while (count)
+	{
+		tickWr();
+		tickWr();
+		count--;
+	}
+}
 
 void S6D0164::sendCmdAndData(const uint8_t cmd, const uint16_t data)
 {
@@ -402,6 +419,13 @@ uint16_t S6D0164::RGB888ToRGB565(const uint8_t r, const uint8_t g, const uint8_t
 	const uint16_t g6 = (uint16_t)((g * 253 + 505) >> 10);
 	const uint16_t b5 = (uint16_t)((b * 249 + 1014) >> 11);
 	return (uint16_t)(r5 << 11 | g6 << 5 | b5);
+}
+
+
+void S6D0164::tickWr()
+{
+	switchWr(0);
+	switchWr(1);
 }
 
 void S6D0164::switchRd(const short BitVal)

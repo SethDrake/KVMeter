@@ -89,14 +89,12 @@ void __attribute__((interrupt("IRQ"))) ADC1_2_IRQHandler(void) {
 
 void custom_fault_handler(const char * title)
 {
-	
 	if (display.isReady())
 	{
-		
 		display.setRotation(LANDSCAPE);
 		display.setColor(WHITE, BLUE);
 		display.clear(BLUE);
-		display.printf(10, 165, title);
+		display.printf(10, 163, title);
 	}
 }
 
@@ -121,26 +119,31 @@ void hard_fault_handler(unsigned int * hardfault_args)
 	stacked_pc = ((unsigned long) hardfault_args[6]);
 	stacked_psr = ((unsigned long) hardfault_args[7]);
 
-	custom_fault_handler("HARD FAULT DETECTED --- SYSTEM STOPPED");
+	custom_fault_handler("   HARD FAULT DETECTED");
 	if (display.isReady())
 	{
-		display.printf(10, 160, "R0 = %x", stacked_r0);
-		display.printf(10, 145, "R1 = %x", stacked_r1);
-		display.printf(10, 130, "R2 = %x", stacked_r2);
-		display.printf(10, 115, "R3 = %x", stacked_r3);
-		display.printf(10, 100, "R12 = %x", stacked_r12);
-		display.printf(10, 85, "LR [R14] = %x", stacked_lr);
-		display.printf(10, 70, "PC [R15] = %x", stacked_pc);
-		display.printf(10, 55, "PSR = %x", stacked_psr);
-		display.printf(10, 40, "BFAR = %x", (*((volatile unsigned long *)(0xE000ED38))));
-		display.printf(10, 25, "CFSR = %x", (*((volatile unsigned long *)(0xE000ED28))));
-		display.printf(10, 10, "HFSR = %x", (*((volatile unsigned long *)(0xE000ED2C))));
-		/*display.printf(10, 35, "DFSR = %x", (*((volatile unsigned long *)(0xE000ED30))));
+		display.printf(10, 150, "R0 = %x", stacked_r0);
+		display.printf(10, 135, "R1 = %x", stacked_r1);
+		display.printf(10, 120, "R2 = %x", stacked_r2);
+		display.printf(10, 105, "R3 = %x", stacked_r3);
+		display.printf(10, 90, "R12 = %x", stacked_r12);
+		display.printf(10, 75, "LR [R14] = %x", stacked_lr);
+		display.printf(10, 60, "PC [R15] = %x", stacked_pc);
+		display.printf(10, 45, "PSR = %x", stacked_psr);
+		display.printf(10, 30, "BFAR = %x", (*((volatile unsigned long *)(0xE000ED38))));
+		display.printf(10, 15, "CFSR = %x", (*((volatile unsigned long *)(0xE000ED28))));
+		/*display.printf(10, 10, "HFSR = %x", (*((volatile unsigned long *)(0xE000ED2C))));
+		display.printf(10, 35, "DFSR = %x", (*((volatile unsigned long *)(0xE000ED30))));
 		display.printf(10, 20, "AFSR = %x", (*((volatile unsigned long *)(0xE000ED3C))));*/
 		display.printf(10, 0, "SCB_SHCSR = %x", SCB->SHCSR);
-	}
 
-	while (1);
+		DelayManager::DelayMs(5000);
+		custom_fault_handler("   HARD FAULT DETECTED");
+		display.printf(10, 135, "    RESET INITIATED...");
+	}
+	DelayManager::DelayMs(1000);
+	NVIC_SystemReset();
+	//while (1);
 }
 
 #ifdef __cplusplus
