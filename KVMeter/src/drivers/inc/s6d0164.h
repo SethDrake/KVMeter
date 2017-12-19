@@ -23,7 +23,7 @@ public:
 	S6D0164();
 	~S6D0164();
 	void setupHw(GPIO_TypeDef* dataPort, GPIO_TypeDef* controlPort, uint16_t rdPin, uint16_t wrPin, uint16_t rsPin, uint16_t csPin, uint16_t resetPin);
-	void init(void);
+	void init();
 	void enable(short on);
 	uint32_t readID();
 	void clear(uint16_t color);
@@ -41,7 +41,7 @@ public:
 	void setFont(const unsigned char font[]);
 	void setRotation(uint8_t rotationMode);
 	uint16_t RGB888ToRGB565(uint8_t r, uint8_t g, uint8_t b);
-	bool isReady(void);
+	bool isReady();
 	
 protected:
 	GPIO_TypeDef* dataPort;
@@ -60,8 +60,8 @@ protected:
 	bool isOk;
 
 private:
-	void setCol(uint16_t StartCol, uint16_t EndCol);
-	void setPage(uint16_t StartPage, uint16_t EndPage);
+	void setVertical(uint16_t StartCol, uint16_t EndCol);
+	void setHorizontal(uint16_t StartPage, uint16_t EndPage);
 	void setBus(uint16_t val);
 	void sendCmd(uint8_t index);
 	void sendWord(uint16_t data);

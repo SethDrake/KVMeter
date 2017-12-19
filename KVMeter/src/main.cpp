@@ -116,19 +116,23 @@ int main()
 	
 	display.setupHw(S6D0164_DATA_PORT, S6D0164_CTRL_PORT, S6D0164_CTRL_PIN_RD, S6D0164_CTRL_PIN_WR, S6D0164_CTRL_PIN_RS, S6D0164_CTRL_PIN_CS, S6D0164_CTRL_PIN_RESET);
 	display.init();
+	display.setRotation(LANDSCAPE);
 	display.clear(BLACK);
 
+	/*display.pixelDraw(0, 0, RED);
+	display.pixelDraw(175, 219, BLUE);
 	display.printf(10, 50, "TEST MODE");
 	display.drawBorder(5, 5, 50, 50, 2, GREEN);
 	uint16_t buf1[] = { GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN };
-	display.bufferDraw(0, 80, 10, 2, buf1); 
+	display.bufferDraw(0, 80, 10, 2, buf1);*/
 
-	display.setRotation(LANDSCAPE);
+	//display.setRotation(LANDSCAPE);
 	display.pixelDraw(0, 0, RED);
+	display.pixelDraw(219, 175, BLUE);
 	display.printf(100, 50, "TEST MODE");
 	display.drawBorder(5, 5, 50, 50, 2, BLUE);
 	uint16_t buf2[] = { BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE };
-	display.bufferDraw(0, 80, 10, 2, buf2); 
+	display.bufferDraw(0, 80, 10, 2, buf2);
 
 
 	while (true)
