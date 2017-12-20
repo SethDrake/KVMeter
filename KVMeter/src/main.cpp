@@ -116,34 +116,31 @@ int main()
 	
 	display.setupHw(S6D0164_DATA_PORT, S6D0164_CTRL_PORT, S6D0164_CTRL_PIN_RD, S6D0164_CTRL_PIN_WR, S6D0164_CTRL_PIN_RS, S6D0164_CTRL_PIN_CS, S6D0164_CTRL_PIN_RESET);
 	display.init();
-	display.setRotation(PORTRAIT);
-	display.clear(BLACK);
-
-	/*display.pixelDraw(0, 0, RED);
-	display.pixelDraw(175, 219, BLUE);
-	display.printf(10, 50, "TEST MODE");
-	display.drawBorder(5, 5, 50, 50, 2, GREEN);
-	uint16_t buf1[] = { GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN, GREEN };
-	display.bufferDraw(0, 80, 10, 2, buf1);
-
+	
 	display.setRotation(LANDSCAPE);
-	display.pixelDraw(0, 0, RED);
-	display.pixelDraw(219, 175, BLUE);
-	display.printf(100, 50, "TEST MODE");
-	display.drawBorder(5, 5, 50, 50, 2, BLUE);
-	uint16_t buf2[] = { BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE, BLUE };
-	display.bufferDraw(0, 80, 10, 2, buf2);*/
+	
+	display.clear(BLUE);
+	display.setColor(WHITE, BLUE);
 
-	uint8_t t = 15 / 0;
-
+	uint16_t intPart = 0;
+	uint16_t floatPart = 0;
+	
 	while (true)
 	{	
+		intPart = cpuTemp;
+		floatPart = ((cpuTemp - intPart) * 10);
+		display.printf(5, 25, "VOLTAGE: %04u.%02uV", intPart, floatPart);
+		intPart = voltage;
+		floatPart = ((voltage - intPart) * 10);
+		display.printf(5, 10, "TEMP: %02u.%01u\x81\x43", intPart, floatPart);
+		display.drawBorder(3, 2, 140, 40, 1, WHITE);
+		
 		GPIOC->BSRR = GPIO_Pin_8;	
 		GPIOC->BRR = GPIO_Pin_9;
-		DelayManager::Delay(1000);
+		//DelayManager::Delay(1000);
 		GPIOC->BSRR = GPIO_Pin_9;	
 		GPIOC->BRR = GPIO_Pin_8;
-		DelayManager::Delay(1000);
+		//DelayManager::Delay(1000);
 	}
 }
 
