@@ -6,8 +6,10 @@
 #include "misc.h"
 #include "s6d0164.h"
 #include "objects.h"
-#include "delay.h"
 #include "periph_config.h"
+#include "fonts.h"
+#include "delay.h"
+#include <string.h>
 
 
 ADC_MODE adc_mode = VOLTAGE;
@@ -121,26 +123,27 @@ int main()
 	
 	display.clear(BLUE);
 	display.setColor(WHITE, BLUE);
+	display.setFont(Consolas16x25);
 
 	uint16_t intPart = 0;
 	uint16_t floatPart = 0;
 	
 	while (true)
-	{	
+	{			
 		intPart = cpuTemp;
 		floatPart = ((cpuTemp - intPart) * 10);
-		display.printf(5, 25, "VOLTAGE: %04u.%02uV", intPart, floatPart);
+		display.printf(5, 40, "%04u.%02", intPart, floatPart);
 		intPart = voltage;
 		floatPart = ((voltage - intPart) * 10);
-		display.printf(5, 10, "TEMP: %02u.%01u\x81\x43", intPart, floatPart);
-		display.drawBorder(3, 2, 140, 40, 1, WHITE);
+		display.printf(5, 10, "%02u.%01", intPart, floatPart);
+		display.drawBorder(3, 2, 145, 60, 1, WHITE);
 		
 		GPIOC->BSRR = GPIO_Pin_8;	
 		GPIOC->BRR = GPIO_Pin_9;
-		//DelayManager::Delay(1000);
+		DelayManager::Delay(200);
 		GPIOC->BSRR = GPIO_Pin_9;	
 		GPIOC->BRR = GPIO_Pin_8;
-		//DelayManager::Delay(1000);
+		DelayManager::Delay(200);
 	}
 }
 

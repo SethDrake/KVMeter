@@ -13,7 +13,7 @@ S6D0164::S6D0164() {
 	color = WHITE;
 	bgColor = BLACK;
 	
-	font = Consolas8x14;
+	font = Consolas8x15;
 	isOk = false;
 }
 
@@ -160,7 +160,7 @@ void S6D0164::setVertical(const uint16_t startY, const uint16_t stopY)
 	
 	sendCmdAndData(S6D0164_VERT_START, startY);
 	sendCmdAndData(S6D0164_VERT_END, stopY);
-	sendCmdAndData(S6D0164_GRAM_ADDRESS_SET_Y, startY);
+	sendCmdAndData(S6D0164_GRAM_ADDRESS_SET_Y, (this->rotationMode == PORTRAIT) ? startY : stopY);
 }
 
 void S6D0164::setFont(const unsigned char font[])
@@ -176,11 +176,11 @@ void S6D0164::setRotation(const uint8_t rotationMode)
 	switchCs(0);
 	if (this->rotationMode == PORTRAIT) // 0x1010 - 0001000000010000
 	{
-		sendCmdAndData(S6D0164_ENTRY_MODE, 0x1010);	
+		sendCmdAndData(S6D0164_ENTRY_MODE, 0x1030);	
 	}
-	else if (this->rotationMode == LANDSCAPE) // 0x1008 - 0001000000001000
+	else if (this->rotationMode == LANDSCAPE) // 0x1018 - 0001000000011000
 	{
-		sendCmdAndData(S6D0164_ENTRY_MODE, 0x1008);	
+		sendCmdAndData(S6D0164_ENTRY_MODE, 0x1018);	
 	}
 	switchCs(1);
 }
@@ -239,7 +239,7 @@ void S6D0164::bufferDraw(const uint16_t x, const uint16_t y, const uint16_t xsiz
 	if (this->rotationMode == PORTRAIT)
 	{
 		setHorizontal(x, x + xsize - 1);
-		setVertical(TFT_MAX_Y - y, TFT_MAX_Y - y - (ysize - 1));
+		setVertical(TFT_MAX_Y - y - (ysize - 1), TFT_MAX_Y - y);
 	}
 	else if (this->rotationMode == LANDSCAPE)
 	{
@@ -270,21 +270,28 @@ void S6D0164::drawBorder(const uint16_t xpos, const uint16_t ypos, const uint16_
 
 void S6D0164::putChar(const uint16_t x, const uint16_t y, const uint8_t chr, const uint16_t charColor, const uint16_t bkgColor) {
 	uint16_t y1 = y;
-	uint8_t f_width = font[0];	
-	uint8_t f_height = font[1];
-	const uint16_t f_bytes = (f_width * f_height / 8);
+	const uint8_t f_width = font[0];	
+	const uint8_t f_height = font[1];
+	const uint8_t firstCharCode = font[2];
+
+	uint16_t totalPixels = f_width * f_height;
+	uint16_t bytesPerSymbol = totalPixels / 8;
+	if (totalPixels % 8 != 0)
+	{
+		bytesPerSymbol++;
+	}
 	
 	uint16_t t = 0;
-	uint16_t charbuf[(f_width + 1) * f_height];
+	uint16_t charbuf[totalPixels];
 	
 	//fill charbuf
 	for (uint8_t i = 0; i < f_height; i++)
 	{
 		for (uint8_t j = 0; j < f_width; j++) {
-			const uint16_t bitNumberGlobal = f_width * (f_height - i) + (f_width - j);
-			const uint16_t byteNumberLocal = (bitNumberGlobal / 8);
-			const uint8_t bitNumberInByte = bitNumberGlobal - byteNumberLocal * 8;
-			const uint8_t glyphByte = font[(chr - 0x20) * f_bytes + byteNumberLocal + 2];
+			const uint16_t bitNumberInChar = (i * f_width) + j;
+			const uint16_t byteNumberInChar = (bitNumberInChar / 8);
+			const uint8_t bitNumberInByte = 7 - (bitNumberInChar - (byteNumberInChar * 8));
+			const uint8_t glyphByte = font[3 + (chr - firstCharCode) * bytesPerSymbol + byteNumberInChar];
 			const uint8_t mask = 1 << bitNumberInByte;
 			if (glyphByte & mask) {
 				charbuf[t++] = charColor;
@@ -294,11 +301,10 @@ void S6D0164::putChar(const uint16_t x, const uint16_t y, const uint8_t chr, con
 				charbuf[t++] = bkgColor;
 			}
 		}
-		charbuf[t++] = bkgColor; //vertical empty line right from symbol
 	}
 	y1 -= 3;
 	
-	bufferDraw(x, y1, f_width + 1, f_height, charbuf);
+	bufferDraw(x, y1, f_width, f_height, charbuf);
 }
 
 void S6D0164::putString(const char str[], const uint16_t x, const uint16_t y, const uint16_t charColor, const uint16_t bkgColor) {
