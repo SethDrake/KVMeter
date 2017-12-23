@@ -7,8 +7,8 @@
 /*        PA11, PA12 - USB		   */
 
 
-#define V_MEASURE_PORT			GPIOA
-#define V_MEASURE_PIN			GPIO_Pin_0
+#define V_MEASURE_PORT			GPIOB
+#define V_MEASURE_PIN			GPIO_Pin_8
 
 #define S6D0164_DATA_PORT		GPIOA
 #define S6D0164_CTRL_PORT		GPIOC

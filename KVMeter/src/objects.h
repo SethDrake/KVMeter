@@ -30,9 +30,5 @@ typedef enum
 
 extern S6D0164 display;
 
-extern float voltage;
-extern float cpuTemp;
-
-extern void readADCValue(void);
 
 #endif //__OBJECTS_H_

@@ -80,12 +80,12 @@ void __attribute__((interrupt("IRQ"))) SysTick_Handler(void) {
 	DelayManager::SysTickIncrement();
 }
 	
-void __attribute__((interrupt("IRQ"))) ADC1_2_IRQHandler(void) {
+/*void __attribute__((interrupt("IRQ"))) ADC1_2_IRQHandler(void) {
 	if (ADC_GetITStatus(ADC1, ADC_IT_EOC)) {
 		ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
 		readADCValue();
 	}
-}
+}*/
 
 void custom_fault_handler(const char * title)
 {

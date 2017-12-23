@@ -17,6 +17,7 @@ void UsageFault_Handler(void);
 void DebugMon_Handler(void);
 //void PendSV_Handler(void);
 void SysTick_Handler(void);
+//void ADC1_2_IRQHandler(void);
 
 extern void hard_fault_handler(unsigned int * hardfault_args);
 extern void custom_fault_handler(const char * title);
