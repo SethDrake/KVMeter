@@ -156,6 +156,7 @@ void ADC_Configuration()
 
 void drawVoltageGraph(const uint8_t y, const uint16_t barColor, const uint16_t bkgColor);
 
+
 int main()
 {
 	Faults_Configuration();
@@ -179,16 +180,15 @@ int main()
 
 	const uint32_t divCoeff = (r1 + r2) / r1;
 
+	uint64_t oldTicks = DelayManager::GetSysTickCount();
+	uint64_t ticks = oldTicks;
+
 	while (true)
 	{			
 		voltage = ((adcData[0] * 2.97f) / 4095);	
 		const uint16_t intPart = voltage;
-		const uint16_t floatPart = ((voltage - intPart) * 100);
-		display.printf(5, 10, "%04u.%02u\x3B", intPart, floatPart);
-		/*intPart = cpuTemp;
-		floatPart = ((cpuTemp - intPart) * 10);
-		display.printf(5, 10, "%02u.%01u\x3C\x3A", intPart, floatPart);
-		display.drawBorder(3, 2, 145, 60, 1, WHITE);*/
+		const uint16_t floatPart = ((voltage - intPart) * 1000);
+		display.printf(5, 10, "%02u.%03u\x3B", intPart, floatPart);
 		drawVoltageGraph(40, WHITE, BLUE);
 		
 		/*GPIOC->BSRR = GPIO_Pin_8;	
@@ -197,6 +197,10 @@ int main()
 		GPIOC->BSRR = GPIO_Pin_9;	
 		GPIOC->BRR = GPIO_Pin_8;
 		DelayManager::Delay(10);*/
+
+		ticks = DelayManager::GetSysTickCount();
+		display.printf(150, 10, "%02u", 1000/(ticks - oldTicks));
+		oldTicks = ticks;
 	}
 }
 
