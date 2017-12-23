@@ -123,7 +123,7 @@ int main()
 	
 	display.clear(BLUE);
 	display.setColor(WHITE, BLUE);
-	display.setFont(Consolas16x25);
+	display.setFont(Consolas17x25);
 
 	uint16_t intPart = 0;
 	uint16_t floatPart = 0;
@@ -132,10 +132,10 @@ int main()
 	{			
 		intPart = cpuTemp;
 		floatPart = ((cpuTemp - intPart) * 10);
-		display.printf(5, 40, "%04u.%02", intPart, floatPart);
+		display.printf(5, 40, "%04u.%02u\x3B", intPart, floatPart);
 		intPart = voltage;
 		floatPart = ((voltage - intPart) * 10);
-		display.printf(5, 10, "%02u.%01", intPart, floatPart);
+		display.printf(5, 10, "%02u.%01u\x3C\x3A", intPart, floatPart);
 		display.drawBorder(3, 2, 145, 60, 1, WHITE);
 		
 		GPIOC->BSRR = GPIO_Pin_8;	
